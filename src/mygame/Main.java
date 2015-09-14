@@ -101,6 +101,7 @@ public class Main extends SimpleApplication {
          bulletAppState.getPhysicsSpace().add(player);
     }
 
+    
     private void setUpLight() {
         // We add light so we see the scene
         AmbientLight al = new AmbientLight();
@@ -153,7 +154,7 @@ public class Main extends SimpleApplication {
         guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText ch = new BitmapText(guiFont, false);
         ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        ch.setText("+"); // crosshairs
+        ch.setText("+");
         ch.setLocalTranslation(
           settings.getWidth() / 2 - ch.getLineWidth()/2, 
           settings.getHeight() / 2 + ch.getLineHeight()/2, 
