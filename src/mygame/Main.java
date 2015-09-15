@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
@@ -24,9 +25,12 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.system.AppSettings;
 
 /**
  * test
@@ -50,14 +54,22 @@ public class Main extends SimpleApplication {
     
     
     public static void main(String[] args) {
+        
+        AppSettings settings = new AppSettings(true);
+        settings.setResolution(1024, 768);  
+        settings.setTitle("Spirit`s game");
+        settings.setSettingsDialogImage("/Textures/logo.jpg");
+        
         Main app = new Main();
+        //app.setShowSettings(false);
+        app.setSettings(settings);
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
       
-        initCrossHairs(); // a "+" in the middle of the screen to help aiming
+        initCrossHairs();
         initAudio();
 
          /** Set up Physics */
@@ -67,7 +79,7 @@ public class Main extends SimpleApplication {
 
          // We re-use the flyby camera for rotation, while positioning is handled by physics
          viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-         flyCam.setMoveSpeed(80);
+         flyCam.setMoveSpeed(60);
          setUpKeys();
          setUpLight();
 
@@ -136,7 +148,7 @@ public class Main extends SimpleApplication {
         audio_gun = new AudioNode(assetManager, "Sounds/Effects/Gun.wav", false);
         audio_gun.setPositional(false);
         audio_gun.setLooping(false);
-        audio_gun.setVolume(2);
+        audio_gun.setVolume(1.5f);
         rootNode.attachChild(audio_gun);
     }      
     
@@ -160,7 +172,10 @@ public class Main extends SimpleApplication {
           settings.getHeight() / 2 + ch.getLineHeight()/2, 
           0);
         guiNode.attachChild(ch);
-    }      
+    }         
+    
+    
+ 
     
     
     private ActionListener actionListener = new ActionListener() {
@@ -174,25 +189,30 @@ public class Main extends SimpleApplication {
                 Ray ray = new Ray(cam.getLocation(), cam.getDirection());
                 // 3. Collect intersections between Ray and Shootables in results list.
                 sceneModel.collideWith(ray, results);
-                // 4. Print the results
-                System.out.println("----- Collisions? " + results.size() + "-----");
-                for (int i = 0; i < results.size(); i++) {
-                  // For each hit, we know distance, impact point, name of geometry.
-                  float dist = results.getCollision(i).getDistance();
-                  Vector3f pt = results.getCollision(i).getContactPoint();
-                  String hit = results.getCollision(i).getGeometry().getName();
-                }
+
+                //float dist = results.getCollision(i).getDistance();
+                //Vector3f pt = results.getCollision(i).getContactPoint();
+                //String hit = results.getCollision(i).getGeometry().getName();
+
                 // 5. Use the results (we mark the hit object)
                 if (results.size() > 0) {
 
-                  Geometry mark = makeMark();
+                  //Geometry mark = makeMark();
 
-                  // The closest collision point is what was truly hit:
                   CollisionResult closest = results.getClosestCollision();
-                  // Let's interact - we mark the hit with a red dot.
-                  mark.setLocalTranslation(closest.getContactPoint());
 
-                  rootNode.attachChild(mark);
+                  Vector3f normal = closest.getContactNormal();
+                  Vector3f point = closest.getContactPoint();
+                  
+                  
+                  Debug.simpleArray(point, normal, assetManager, rootNode);
+                  
+                  //System.out.println(closest.getContactNormal().toString());
+                  //closest.
+                  
+                  //mark.setLocalTranslation(closest.getContactPoint());
+                  //rootNode.attachChild(mark);
+                  
                 }
 
                 audio_gun.playInstance();

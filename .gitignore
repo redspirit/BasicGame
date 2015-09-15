@@ -1,47 +1,3 @@
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Windows shortcuts
-*.lnk
-
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
-
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
 
 nbproject
 build
@@ -50,5 +6,43 @@ dist
 nbdist
 nbactions.xml
 nb-configuration.xml
+
+
+Thumbs.db
+ehthumbs.db
+
+Desktop.ini
+
+
+$RECYCLE.BIN/
+
+
+*.cab
+*.msi
+*.msm
+*.msp
+
+
+*.lnk
+
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+._*
+
+
+.Spotlight-V100
+.Trashes
+
+
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
 
 
