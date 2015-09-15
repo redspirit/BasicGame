@@ -21,16 +21,22 @@ import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.debug.Grid;
+import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.scene.shape.Surface;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Texture;
 
 /**
  * test
@@ -61,7 +67,7 @@ public class Main extends SimpleApplication {
         settings.setSettingsDialogImage("/Textures/logo.jpg");
         
         Main app = new Main();
-        //app.setShowSettings(false);
+        app.setShowSettings(false);
         app.setSettings(settings);
         app.start();
     }
@@ -111,6 +117,10 @@ public class Main extends SimpleApplication {
          rootNode.attachChild(sceneModel);
          bulletAppState.getPhysicsSpace().add(landscape);
          bulletAppState.getPhysicsSpace().add(player);
+         
+         
+         makeBulletHole(new Vector3f(0f, 4f, -20f), new Vector3f(0f, 0f, 0f));
+         
     }
 
     
@@ -148,7 +158,7 @@ public class Main extends SimpleApplication {
         audio_gun = new AudioNode(assetManager, "Sounds/Effects/Gun.wav", false);
         audio_gun.setPositional(false);
         audio_gun.setLooping(false);
-        audio_gun.setVolume(1.5f);
+        audio_gun.setVolume(0.3f);
         rootNode.attachChild(audio_gun);
     }      
     
@@ -175,7 +185,34 @@ public class Main extends SimpleApplication {
     }         
     
     
- 
+    protected void makeBulletHole(Vector3f pos, Vector3f nor2) {
+        // todo can optimize
+        Geometry g = new Geometry("bullet hole", new Box(0.5f, 0.5f, 0.01f) );
+        
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        
+        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/bullet_hole.png"));
+        
+        mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        g.setQueueBucket(Bucket.Transparent);
+        
+        g.setMaterial(mat);
+
+        Vector3f nor = new Vector3f(0f, 0f, (float) (-Math.PI / 2));
+        
+        float pi = (float)Math.PI;
+        
+        
+        
+        g.setLocalTranslation(pos);
+        g.rotate(nor2.x * pi, nor2.y * pi, nor2.z * pi);
+        //g.rotateUpTo(nor2);
+        
+        System.out.println(nor2.x + ", " + nor2.y + ", " + nor2.z);
+        
+        rootNode.attachChild(g);
+        
+    }     
     
     
     private ActionListener actionListener = new ActionListener() {
@@ -198,6 +235,7 @@ public class Main extends SimpleApplication {
                 if (results.size() > 0) {
 
                   //Geometry mark = makeMark();
+                    
 
                   CollisionResult closest = results.getClosestCollision();
 
@@ -206,6 +244,9 @@ public class Main extends SimpleApplication {
                   
                   
                   Debug.simpleArray(point, normal, assetManager, rootNode);
+                  
+                  makeBulletHole(point, normal);
+                  
                   
                   //System.out.println(closest.getContactNormal().toString());
                   //closest.
