@@ -56,6 +56,7 @@ public class Main extends SimpleApplication {
     private Vector3f camDir = new Vector3f();
     private Vector3f camLeft = new Vector3f();  
     private AudioNode audio_gun;
+    float pi = (float)Math.PI;
         
     
     
@@ -67,7 +68,7 @@ public class Main extends SimpleApplication {
         settings.setSettingsDialogImage("/Textures/logo.jpg");
         
         Main app = new Main();
-        app.setShowSettings(false);
+        //app.setShowSettings(false);
         app.setSettings(settings);
         app.start();
     }
@@ -119,10 +120,9 @@ public class Main extends SimpleApplication {
          bulletAppState.getPhysicsSpace().add(player);
          
          
-         makeBulletHole(new Vector3f(0f, 4f, -20f), new Vector3f(0f, 0f, 0f));
+         //makeBulletHole(new Vector3f(0f, 4f, -10f), new Vector3f(0f, 0.5f, 0f));
          
     }
-
     
     private void setUpLight() {
         // We add light so we see the scene
@@ -151,7 +151,6 @@ public class Main extends SimpleApplication {
         inputManager.addListener(actionListener, "Jump");
         inputManager.addListener(actionListener, "Shoot");
     }
-    
     
     private void initAudio() {
         /* gun shot sound is to be triggered by a mouse click. */
@@ -183,35 +182,25 @@ public class Main extends SimpleApplication {
           0);
         guiNode.attachChild(ch);
     }         
-    
-    
+     
     protected void makeBulletHole(Vector3f pos, Vector3f nor2) {
         // todo can optimize
-        Geometry g = new Geometry("bullet hole", new Box(0.5f, 0.5f, 0.01f) );
+        Geometry g = new Geometry("bullet hole", new Box(0.2f, 0.005f, 0.2f) );
         
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         
-        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/bullet_hole.png"));
+        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/bullet_hole_2.png"));
         
         mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        
+        //BlendMode.Color
+        
         g.setQueueBucket(Bucket.Transparent);
         
         g.setMaterial(mat);
-
-        Vector3f nor = new Vector3f(0f, 0f, (float) (-Math.PI / 2));
-        
-        float pi = (float)Math.PI;
-        
-        
-        
         g.setLocalTranslation(pos);
-        g.rotate(nor2.x * pi, nor2.y * pi, nor2.z * pi);
-        //g.rotateUpTo(nor2);
-        
-        System.out.println(nor2.x + ", " + nor2.y + ", " + nor2.z);
-        
+        g.rotateUpTo(nor2);
         rootNode.attachChild(g);
-        
     }     
     
     
@@ -243,7 +232,7 @@ public class Main extends SimpleApplication {
                   Vector3f point = closest.getContactPoint();
                   
                   
-                  Debug.simpleArray(point, normal, assetManager, rootNode);
+                  //Debug.simpleArray(point, normal, assetManager, rootNode);
                   
                   makeBulletHole(point, normal);
                   
