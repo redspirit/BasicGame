@@ -4,12 +4,16 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.audio.AudioNode;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.CharacterControl;
+import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.font.BitmapText;
@@ -23,6 +27,7 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
@@ -32,11 +37,14 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
+import com.jme3.scene.debug.WireBox;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
-import com.jme3.scene.shape.Surface;
+import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
+import com.jme3.collision.Collidable;
+import com.jme3.collision.UnsupportedCollisionException;
 
 /**
  * test
@@ -56,14 +64,15 @@ public class Main extends SimpleApplication {
     private Vector3f camDir = new Vector3f();
     private Vector3f camLeft = new Vector3f();  
     private AudioNode audio_gun;
-    float pi = (float)Math.PI;
+    private Geometry triggerArea;
+    private TriggerArea ta;
+
         
-    
-    
     public static void main(String[] args) {
         
         AppSettings settings = new AppSettings(true);
         settings.setResolution(1024, 768);  
+        settings.setFrequency(60);
         settings.setTitle("Spirit`s game");
         settings.setSettingsDialogImage("/Textures/logo.jpg");
         
@@ -86,14 +95,17 @@ public class Main extends SimpleApplication {
 
          // We re-use the flyby camera for rotation, while positioning is handled by physics
          viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-         flyCam.setMoveSpeed(60);
+         
+         //flyCam.setRotationSpeed(0.5f);
          setUpKeys();
          setUpLight();
-
+         
+         
          // We load the scene from the zip file and adjust its size.
          assetManager.registerLocator("town.zip", ZipLocator.class);
          sceneModel = assetManager.loadModel("main.scene");
          sceneModel.setLocalScale(2f);
+         sceneModel.setName("main scene");
 
          // We set up collision detection for the scene by creating a
          // compound collision shape and a static RigidBodyControl with mass zero.
@@ -113,14 +125,14 @@ public class Main extends SimpleApplication {
          player.setGravity(30);
          player.setPhysicsLocation(new Vector3f(0, 10, 0));
 
+         
          // We attach the scene and the player to the rootnode and the physics space,
          // to make them appear in the game world.
          rootNode.attachChild(sceneModel);
          bulletAppState.getPhysicsSpace().add(landscape);
          bulletAppState.getPhysicsSpace().add(player);
          
-         
-         //makeBulletHole(new Vector3f(0f, 4f, -10f), new Vector3f(0f, 0.5f, 0f));
+         makeTrigerArea();
          
     }
     
@@ -170,6 +182,47 @@ public class Main extends SimpleApplication {
         return mark;
     }    
     
+    
+    protected void makeTrigerArea() {
+        
+        
+//        GhostControl ghost = new GhostControl( new BoxCollisionShape(new Vector3f(3f, 1f, 4f)));
+//        Node node = new Node("a ghost-controlled thing");
+//        node.addControl(ghost);
+//
+//        node.setLocalTranslation(new Vector3f(0f, 2f, -15f));
+//        
+//        rootNode.attachChild(node);
+//        
+//        bulletAppState.getPhysicsSpace().add(ghost);      
+//      
+        
+//        MyCustomControl cc = new MyCustomControl(bulletAppState);
+        
+        
+        CollisionResults results = new CollisionResults();
+
+
+        
+        
+        Geometry triggerArea = new Geometry("trigger area", new Box(5f, 1f, 5f) );
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Blue);
+        triggerArea.setMaterial(mat);
+        triggerArea.setLocalTranslation(new Vector3f(0f, 1f, -15f));
+
+        //triggerArea.rotate(0, 0.5f, 0);
+        
+        //triggerArea.get
+        
+        ta = new TriggerArea(triggerArea);
+
+        
+        rootNode.attachChild(triggerArea);
+
+        
+    }       
+    
     protected void initCrossHairs() {
         setDisplayStatView(false);
         guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
@@ -184,19 +237,13 @@ public class Main extends SimpleApplication {
     }         
      
     protected void makeBulletHole(Vector3f pos, Vector3f nor2) {
-        // todo can optimize
+        // todo нужно создать отдельную модельку с текстурой в редакторе
         Geometry g = new Geometry("bullet hole", new Box(0.2f, 0.005f, 0.2f) );
-        
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        
         mat.setTexture("ColorMap", assetManager.loadTexture("Textures/bullet_hole_2.png"));
-        
         mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-        
         //BlendMode.Color
-        
         g.setQueueBucket(Bucket.Transparent);
-        
         g.setMaterial(mat);
         g.setLocalTranslation(pos);
         g.rotateUpTo(nor2);
@@ -268,8 +315,10 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
 
-        camDir.set(cam.getDirection()).multLocal(0.6f);
-        camLeft.set(cam.getLeft()).multLocal(0.4f);
+        float speed = 0.2f;
+        
+        camDir.set(cam.getDirection()).multLocal(speed);
+        camLeft.set(cam.getLeft()).multLocal(speed);
         walkDirection.set(0, 0, 0);
         if (left) {
             walkDirection.addLocal(camLeft);
@@ -285,14 +334,33 @@ public class Main extends SimpleApplication {
         }
 
 
-        float axisY = walkDirection.getY();
-        if(axisY > 0.1f) axisY = 0.1f;
-        if(axisY < -0.1f) axisY = -0.1f;
-        walkDirection.setY(axisY);
+        //float axisY = walkDirection.getY();
+        //if(axisY > 0.05f) axisY = 0.05f;
+        //if(axisY < -0.05f) axisY = -0.05f;
+        walkDirection.setY(0f);
 
+        //player.getCollisionShape();
 
         player.setWalkDirection(walkDirection);
         cam.setLocation(player.getPhysicsLocation());        
+        
+        String res = "";
+        
+        if(ta.isIntersects(player)) {
+            
+            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
+            res = "TRUE";
+            
+        } else {
+            
+            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
+            res = "FALSE";
+            
+        }
+        
+        
+        //CollisionResults results = new CollisionResults();
+        fpsText.setText("collider: " + res + "    Y=" + cam.getLocation().getY());
         
     }    
     
