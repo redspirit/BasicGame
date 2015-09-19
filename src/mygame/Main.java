@@ -152,7 +152,7 @@ public class Main extends SimpleApplication {
                 dot = new Vector3f(x / 3 - 20, 1f, y / 3 - 35);
                 
                 if(ta.isIntersects(dot)) {
-                    makeMark(ColorRGBA.Red, dot);
+                    //makeMark(ColorRGBA.Red, dot);
                 } else {
                     //makeMark(ColorRGBA.Green, dot);
                 }                
@@ -218,7 +218,7 @@ public class Main extends SimpleApplication {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Blue);
         triggerArea.setMaterial(mat);
-        triggerArea.setLocalTranslation(new Vector3f(-1f, 0f, -15f));
+        triggerArea.setLocalTranslation(new Vector3f(-1f, 0.0f, -15f));
 
         triggerArea.rotate(0, 0.25f * PI, 0);
         
@@ -348,18 +348,18 @@ public class Main extends SimpleApplication {
         //player.getCollisionShape();
 
         player.setWalkDirection(walkDirection);
-        //cam.setLocation(player.getPhysicsLocation());        
+        cam.setLocation(player.getPhysicsLocation());        
         
         
-//        if(ta.isIntersects(cam)) {
-//            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
-//        } else {
-//            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
-//        }
+        if(ta.isIntersects(cam)) {
+            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
+        } else {
+            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
+        }
         
         //ta.getGeometry().rotate(0f,  tpf, 0f);
         
-        //fpsText.setText("debug: " + ta.debugText);
+        fpsText.setText("debug: " + ta.debugText);
         
     }
     
