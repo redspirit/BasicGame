@@ -66,6 +66,7 @@ public class Main extends SimpleApplication {
     private AudioNode audio_gun;
     private Geometry triggerArea;
     private TriggerArea ta;
+    private float PI = (float) Math.PI;
 
         
     public static void main(String[] args) {
@@ -97,8 +98,11 @@ public class Main extends SimpleApplication {
          viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
          
          //flyCam.setRotationSpeed(0.5f);
+         flyCam.setMoveSpeed(10);
          setUpKeys();
          setUpLight();
+         
+         cam.setLocation(new Vector3f(0, 50, 15));   
          
          
          // We load the scene from the zip file and adjust its size.
@@ -134,6 +138,29 @@ public class Main extends SimpleApplication {
          
          makeTrigerArea();
          
+         createMesh();
+         
+    }
+    
+    private void createMesh(){
+    
+        Vector3f dot;
+        
+        for(int x = 1; x <= 160; x++){
+            for(int y = 1; y <= 130; y++){
+        
+                dot = new Vector3f(x / 3 - 20, 1f, y / 3 - 35);
+                
+                if(ta.isIntersects(dot)) {
+                    makeMark(ColorRGBA.Red, dot);
+                } else {
+                    //makeMark(ColorRGBA.Green, dot);
+                }                
+                
+            }
+        }
+        
+        
     }
     
     private void setUpLight() {
@@ -173,51 +200,30 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(audio_gun);
     }      
     
-    protected Geometry makeMark() {
-        Sphere sphere = new Sphere(30, 30, 0.3f);
+    protected void makeMark(ColorRGBA color, Vector3f center) {
+        Sphere sphere = new Sphere(4, 4, 0.2f);
         Geometry mark = new Geometry("BOOM!", sphere);
         Material mark_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mark_mat.setColor("Color", ColorRGBA.Red);
+        mark_mat.setColor("Color", color);
         mark.setMaterial(mark_mat);
-        return mark;
+        mark.setLocalTranslation(center);
+        rootNode.attachChild(mark);
     }    
     
     
     protected void makeTrigerArea() {
-        
-        
-//        GhostControl ghost = new GhostControl( new BoxCollisionShape(new Vector3f(3f, 1f, 4f)));
-//        Node node = new Node("a ghost-controlled thing");
-//        node.addControl(ghost);
-//
-//        node.setLocalTranslation(new Vector3f(0f, 2f, -15f));
-//        
-//        rootNode.attachChild(node);
-//        
-//        bulletAppState.getPhysicsSpace().add(ghost);      
-//      
-        
-//        MyCustomControl cc = new MyCustomControl(bulletAppState);
-        
-        
-        CollisionResults results = new CollisionResults();
-
 
         
-        
-        Geometry triggerArea = new Geometry("trigger area", new Box(5f, 1f, 5f) );
+        Geometry triggerArea = new Geometry("trigger area", new Box(10f, 1f, 12f) );
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Blue);
         triggerArea.setMaterial(mat);
-        triggerArea.setLocalTranslation(new Vector3f(0f, 1f, -15f));
+        triggerArea.setLocalTranslation(new Vector3f(-1f, 0f, -15f));
 
-        //triggerArea.rotate(0, 0.5f, 0);
-        
-        //triggerArea.get
+        triggerArea.rotate(0, 0.25f * PI, 0);
         
         ta = new TriggerArea(triggerArea);
 
-        
         rootNode.attachChild(triggerArea);
 
         
@@ -342,26 +348,19 @@ public class Main extends SimpleApplication {
         //player.getCollisionShape();
 
         player.setWalkDirection(walkDirection);
-        cam.setLocation(player.getPhysicsLocation());        
-        
-        String res = "";
-        
-        if(ta.isIntersects(player)) {
-            
-            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
-            res = "TRUE";
-            
-        } else {
-            
-            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
-            res = "FALSE";
-            
-        }
+        //cam.setLocation(player.getPhysicsLocation());        
         
         
-        //CollisionResults results = new CollisionResults();
-        fpsText.setText("collider: " + res + "    Y=" + cam.getLocation().getY());
+//        if(ta.isIntersects(cam)) {
+//            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
+//        } else {
+//            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
+//        }
         
-    }    
+        //ta.getGeometry().rotate(0f,  tpf, 0f);
+        
+        //fpsText.setText("debug: " + ta.debugText);
+        
+    }
     
 }
