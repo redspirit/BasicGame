@@ -16,22 +16,22 @@ import com.jme3.scene.Geometry;
 public class TriggerArea {
     
     private Geometry shape;
-    private boolean isContains = false;
     private Vector3f center, rotation, sizes;
+    private float boundRadius;
     
+    public boolean isContains = false;
+    public String name = "";
     public String debugText = "";
     
-    public TriggerArea(Geometry shape){
+    
+    public TriggerArea(Geometry shape, String name){
         
         this.shape = shape;
+        this.name = name;
    
         this.makeCenter();
         this.makeSizes();
         this.makeAngles();
-        
-        System.out.println("center " + this.center);
-        System.out.println("rotation " + this.rotation);
-        System.out.println("sizes " + this.sizes);
         
     }
     
@@ -77,6 +77,11 @@ public class TriggerArea {
     
     private boolean contains(Vector3f pos){
     
+        // бысрая проверка по расстоянию, когда пересечения точно нет
+        if(pos.distance(this.center) > this.boundRadius){
+            return false;
+        }
+        
         float ax = pos.x - this.center.x;
         float ay = pos.y - this.center.y;
         float az = pos.z - this.center.z;
@@ -88,29 +93,11 @@ public class TriggerArea {
                 rotated.z >= -this.sizes.z && rotated.z <= this.sizes.z);
 
     }
-
-    public boolean isIntersects(Camera cam){
-        return isIntersects(cam.getLocation());
-    }    
     
     public boolean isIntersects(Vector3f pos){
-    
-        Vector3f pos2 = new Vector3f(pos.x, pos.y - 4.9f, pos.z);
-        
-        boolean cont = this.contains(pos2);
-        
-        if(cont != this.isContains) {
-            
-            if(cont) {
-               System.out.println("Hover ON");
-            } else {
-               System.out.println("Hover OFF"); 
-            }
-            
-        }
-        
-        this.isContains = cont;
-        return cont;
+
+        //this.isContains = 
+        return this.contains(new Vector3f(pos.x, pos.y - 4.9f, pos.z));
     
     }
     
@@ -133,7 +120,12 @@ public class TriggerArea {
                 bound.getYExtent() * scale.y,
                 bound.getZExtent() * scale.z
             );  
+        this.boundRadius = this.sizes.distance(Vector3f.ZERO);
     }
-
+    
+    @Override
+    public String toString(){
+        return "TriggerArea: " + this.name;
+    }
     
 }

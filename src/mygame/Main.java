@@ -65,7 +65,7 @@ public class Main extends SimpleApplication {
     private Vector3f camLeft = new Vector3f();  
     private AudioNode audio_gun;
     private Geometry triggerArea;
-    private TriggerArea ta;
+    private TriggerAreaComposer TAC = new TriggerAreaComposer();
     private float PI = (float) Math.PI;
 
         
@@ -137,31 +137,28 @@ public class Main extends SimpleApplication {
          bulletAppState.getPhysicsSpace().add(player);
          
          makeTrigerArea();
-         
-         createMesh();
-         
     }
     
-    private void createMesh(){
-    
-        Vector3f dot;
-        
-        for(int x = 1; x <= 160; x++){
-            for(int y = 1; y <= 130; y++){
-        
-                dot = new Vector3f(x / 3 - 20, 1f, y / 3 - 35);
-                
-                if(ta.isIntersects(dot)) {
-                    //makeMark(ColorRGBA.Red, dot);
-                } else {
-                    //makeMark(ColorRGBA.Green, dot);
-                }                
-                
-            }
-        }
-        
-        
-    }
+//    private void createMesh(){
+//    
+//        Vector3f dot;
+//        
+//        for(int x = 1; x <= 160; x++){
+//            for(int y = 1; y <= 130; y++){
+//        
+//                dot = new Vector3f(x / 3 - 20, 1f, y / 3 - 35);
+//                
+//                if(ta.isIntersects(dot)) {
+//                    //makeMark(ColorRGBA.Red, dot);
+//                } else {
+//                    //makeMark(ColorRGBA.Green, dot);
+//                }                
+//                
+//            }
+//        }
+//        
+//        
+//    }
     
     private void setUpLight() {
         // We add light so we see the scene
@@ -214,18 +211,46 @@ public class Main extends SimpleApplication {
     protected void makeTrigerArea() {
 
         
-        Geometry triggerArea = new Geometry("trigger area", new Box(10f, 1f, 12f) );
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Blue);
-        triggerArea.setMaterial(mat);
-        triggerArea.setLocalTranslation(new Vector3f(-1f, 0.0f, -15f));
+        Geometry ta1 = new Geometry("trigger area", new Box(3f, 1f, 4f) );
+        Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat1.setColor("Color", ColorRGBA.Blue);
+        ta1.setMaterial(mat1);
+        ta1.setLocalTranslation(new Vector3f(0f, 0.0f, -15f));
+        ta1.rotate(0, 0f * PI, 0);
+        TAC.addGeometry(ta1, "BLUE PLACE");
+        rootNode.attachChild(ta1);
 
-        triggerArea.rotate(0, 0.25f * PI, 0);
+
+        Geometry ta2 = new Geometry("trigger area", new Box(3f, 1f, 4f) );
+        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.Green);
+        ta2.setMaterial(mat2);
+        ta2.setLocalTranslation(new Vector3f(-15f, 0.0f, -13f));
+        ta2.rotate(0, 0.25f * PI, 0);
+        TAC.addGeometry(ta2, "GREEN PLACE");
+        rootNode.attachChild(ta2);
+
         
-        ta = new TriggerArea(triggerArea);
+        Geometry ta3 = new Geometry("trigger area", new Box(3f, 1f, 4f) );
+        Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat3.setColor("Color", ColorRGBA.Red);
+        ta3.setMaterial(mat3);
+        ta3.setLocalTranslation(new Vector3f(15f, 0.0f, -13f));
+        ta3.rotate(0, -0.25f * PI, 0);
+        TAC.addGeometry(ta3, "RED PLACE");
+        rootNode.attachChild(ta3);
+        
+        
+        TAC.setListener(new TriggerAreaComposer.EventHandler() {
 
-        rootNode.attachChild(triggerArea);
+            public void hoverIn(TriggerArea ta) {
+                System.out.println("Hover IN " + ta.toString());
+            }
 
+            public void hoverOut(TriggerArea ta) {
+                System.out.println("Hover OUT " + ta.toString()); 
+            }
+        });
         
     }       
     
@@ -350,16 +375,19 @@ public class Main extends SimpleApplication {
         player.setWalkDirection(walkDirection);
         cam.setLocation(player.getPhysicsLocation());        
         
-        
-        if(ta.isIntersects(cam)) {
-            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
-        } else {
-            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
-        }
+  
+//        if(ta.isIntersects(cam)) {
+//            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Red);
+//        } else {
+//            ta.getGeometry().getMaterial().setColor("Color", ColorRGBA.Blue);
+//        }
         
         //ta.getGeometry().rotate(0f,  tpf, 0f);
+  
+        TAC.check(cam);
         
-        fpsText.setText("debug: " + ta.debugText);
+
+        fpsText.setText("debug: " + TAC.debugText);
         
     }
     
